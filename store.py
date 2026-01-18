@@ -1,6 +1,6 @@
-from VendingMachine import VendingMachine
-from Item import Item
-from User import User
+from VendingMachine.VendingMachine import VendingMachine
+from VendingMachine.Item import Item
+from VendingMachine.User import User
 
 
 

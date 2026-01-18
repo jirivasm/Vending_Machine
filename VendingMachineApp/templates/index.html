@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div style="background-color: #e1f5fe; border: 1px solid #01579b; padding: 10px; margin-bottom: 20px;">
+      {% for message in messages %}
+        <p><strong>{{ message }}</strong></p>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    
+    <h1>Vending Machine</h1>
+    <p>User: {{ user.name }} | Wallet: ${{ "%.2f"|format(user.balance) }}</p>
+    <p><strong>Machine Credit: ${{ "%.2f"|format(machine.balance) }}</strong></p>
+
+    <hr>
+    
+    <h3>Insert Money</h3>
+    <form action="/insert" method="post">
+        <input type="number" name="amount" step="0.01" placeholder="Amount">
+        <button type="submit">Insert</button>
+    </form>
+
+    <hr>
+
+    <h3>Items</h3>
+    {% for code, item in machine.inventory.items() %}
+    <div>
+        {{ code }}: {{ item.name }} - ${{ item.price }} (Stock: {{ item.stock }})
+        <form action="/purchase" method="post" style="display:inline;">
+            <input type="hidden" name="code" value="{{ code }}">
+            <button type="submit" {% if item.stock <= 0 %}disabled{% endif %}>Buy</button>
+        </form>
+    </div>
+    {% endfor %}
+
+    <br>
+    <a href="/logout">Logout/Quit</a>
+</body>
+</html>

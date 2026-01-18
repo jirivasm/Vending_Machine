@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vending Machine - Login</title>
+</head>
+<body>
+    <h1>Welcome to the Vending Machine</h1>
+
+    <h3>Select Existing User</h3>
+    <form action="/login" method="post">
+        <input type="text" name="username" placeholder="Enter Username" required>
+        <button type="submit" name="action" value="login">Login</button>
+    </form>
+
+    <hr>
+
+    <h3>Create New User</h3>
+    <form action="/login" method="post">
+        <input type="text" name="username" placeholder="New Username" required>
+        <input type="number" name="balance" placeholder="Starting Balance" required>
+        <button type="submit" name="action" value="create">Register</button>
+    </form>
+</body>
+</html>

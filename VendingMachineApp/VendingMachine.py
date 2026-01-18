@@ -34,15 +34,13 @@ class VendingMachine:
         # 3. Check if the user has enough money
         elif self.balance < item.price:
             needed = item.price - self.balance
-            print(f"Insufficient funds. You need ${needed:.2f} more.")
-            return False
+            return(f"Insufficient funds. You need ${needed:.2f} more.")
+           
 
         # 4. Success!
         else:
             item.reduce_stock()
             change = self.balance - item.price
             self.balance = 0  # Reset balance after giving change
-            print(f"Dispensing {item.name}...")
-            print(f"Transaction successful! Your change is: ${change:.2f}")
             self.user.add_balance(change)
-            return True
+            return(f"Transaction successful! Your change is: ${change:.2f}")
