@@ -2,6 +2,11 @@ pipeline{
     agent any
     
     stages{
+        stage('Check Environment') {
+            steps {
+            sh 'docker --version'
+            }
+        }       
         stage ('Prepare'){
             steps {
                 echo 'checking out the repo...'
