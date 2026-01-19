@@ -20,11 +20,13 @@ pipeline{
             steps {
                 echo 'Deploying to Dockerhub'
                 // This step should not normally be used in your script. Consult the inline help for details.
-                docker.withRegistry('https://index.docker.io/v1/', 'Docker_Hub' ) {
-                // some block
-                def myImage = docker.build("jirivasm/vending-app:${env.BUILD_ID}","./VendingMachineApp")
-                myImage.push()
-                myImage.push("latest")
+                script{
+                    docker.withRegistry('https://index.docker.io/v1/', 'Docker_Hub' ) {
+                    // some block
+                    def myImage = docker.build("jirivasm/vending-app:${env.BUILD_ID}","./VendingMachineApp")
+                    myImage.push()
+                    myImage.push("latest")
+                    }
                 }
             }
         }
