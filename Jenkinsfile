@@ -12,8 +12,11 @@ pipeline{
         stage('Build and Test') {
         steps {
             script {
-                sh 'docker build -t jirivasm/vending-app:test ./VendingMachineApp'
-                sh 'docker run jirivasm/vending-app:test python3 -m unittest testVendingMachine.py'
+
+                withEnv(["MSYS_NO_PATHCONV=1"]) {
+                sh 'docker build -t vending-app ./VendingMachineApp'
+                sh 'docker run --rm vending-app python -m unittest testVendingMachine.py'
+                }
             }
         }
     }   
