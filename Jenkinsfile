@@ -12,13 +12,8 @@ pipeline{
         stage('Build and Test') {
         steps {
             script {
-                // Build the image first (this runs the 'pip install' inside the image)
-                def testImage = docker.build("vending-test", "./VendingMachineApp")
-                
-                // Run the tests inside the container environment
-                testImage.inside {
-                    sh 'python3 -m unittest testVendingMachine.py'
-                }
+                sh 'docker build -t jirivasm/vending-app:test ./VendingMachineApp'
+                sh 'docker run jirivasm/vending-app:test python3 -m unittest testVendingMachine.py'
             }
         }
     }   
