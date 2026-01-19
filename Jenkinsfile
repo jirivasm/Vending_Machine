@@ -16,8 +16,7 @@ pipeline{
                 sh 'docker run --rm vending-app python -m unittest testVendingMachine.py'
                 
             }
-        }
-    }   
+        } 
         stage ('Push To registry'){
             steps {
                 echo 'Deploying to Dockerhub'
