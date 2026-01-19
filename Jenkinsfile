@@ -7,7 +7,7 @@ pipeline{
                 echo 'checking out the repo...'
                 checkout scm
                 echo 'Code Checked out Succesfully'
-                sh 'cd && pip install -r requirements.txt'
+                sh 'cd && pip3 install -r requirements.txt'
             }
         }
         stage ('Build and Test') {
