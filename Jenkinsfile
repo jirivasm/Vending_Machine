@@ -7,15 +7,21 @@ pipeline{
                 echo 'checking out the repo...'
                 checkout scm
                 echo 'Code Checked out Succesfully'
-                sh 'cd && pip3 install -r requirements.txt'
             }
         }
-        stage ('Build and Test') {
-            steps {
-                echo 'Testing the app'
-                sh 'python test_vending_machine.py'
+        stage('Build and Test') {
+        steps {
+            script {
+                // Build the image first (this runs the 'pip install' inside the image)
+                def testImage = docker.build("vending-test", "./VendingMachineApp")
+                
+                // Run the tests inside the container environment
+                testImage.inside {
+                    sh 'python3 -m unittest testVendingMachine.py'
+                }
             }
         }
+    }   
         stage ('Push To registry'){
             steps {
                 echo 'Deploying to Dockerhub'
