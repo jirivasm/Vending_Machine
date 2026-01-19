@@ -20,7 +20,7 @@ pipeline{
             steps {
                 echo 'Deploying to Dockerhub'
                 // This step should not normally be used in your script. Consult the inline help for details.
-                withDockerRegistry(credentialsId: 'Docker_Hub', url: 'https://index.docker.io/v1/) {
+                withDockerRegistry(credentialsId: 'Docker_Hub', url: 'https://index.docker.io/v1/') {
                 // some block
                 def myImage = docker.build("jirivasm/vending-app:${env.BUILD_ID}","./VendingMachineApp")
                 myImage.push()
