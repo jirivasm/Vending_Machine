@@ -1,6 +1,6 @@
 import unittest
-from VendingMachine.VendingMachine import VendingMachine
-from VendingMachine.Item import Item
+from VendingMachine import VendingMachine
+from Item import Item
 
 class testVendingMAchine(unittest.TestCase):
     def setUp(self):
@@ -20,8 +20,8 @@ class testVendingMAchine(unittest.TestCase):
 
     def test_insufficient_funds(self):
         self.vm.insert_money(1.00)
-        result = self.vm.select_item("A1")
-        self.assertFalse(result, "Should not allow purchase with insufficient funds")
+        success, result = self.vm.select_item("A1")
+        self.assertFalse(success, "Should not allow purchase with insufficient funds")
 
     def test_invalid_code(self):
         result = self.vm.select_item("X99")
