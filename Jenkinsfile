@@ -20,13 +20,30 @@ pipeline{
             steps {
                 echo 'Deploying to Dockerhub'
                 // This step should not normally be used in your script. Consult the inline help for details.
-                withDockerRegistry(credentialsId: 'Docker_Hub') {
+                withDockerRegistry(credentialsId: 'Docker_Hub', url: 'https://index.docker.io/v1/) {
                 // some block
                 def myImage = docker.build("jirivasm/vending-app:${env.BUILD_ID}","./VendingMachineApp")
                 myImage.push()
                 myImage.push("latest")
                 }
             }
+        }
+    }
+    post {
+        always {
+            echo 'Cleaning up local Docker images...'
+            script {
+                // This removes the specific image built in this run
+                // The '|| true' ensures the pipeline doesn't fail if the image was already gone
+                sh "docker rmi jirivasm/vending-app:${env.BUILD_ID} || true"
+                sh "docker rmi jirivasm/vending-app:latest || true"
+            }
+        }
+        success {
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Pipeline failed. Check the logs for errors.'
         }
     }
 }
