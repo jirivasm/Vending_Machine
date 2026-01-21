@@ -29,7 +29,7 @@ pipeline{
                 script{
                     docker.withRegistry('https://index.docker.io/v1/', 'Docker_Hub' ) {
                     // some block
-                    def myImage = docker.build("jirivasm/vending-app:${env.BUILD_ID}","./VendingMachineApp")
+                    def myImage = docker.build("jirivasm/vending-app:1.0.${env.BUILD_ID}","./VendingMachineApp")
                     myImage.push()
                     myImage.push("latest")
                     }
