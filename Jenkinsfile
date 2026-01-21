@@ -16,9 +16,15 @@ pipeline{
         }
         stage('Build and Test') {
         steps {
-            
-                sh 'docker build -t vending-app ./VendingMachineApp'
-                sh 'docker run --rm vending-app python -m unittest testVendingMachine.py'
+            script{
+                // 1. Build the image once and store it in a variable
+                def testImage = docker.build("vending-app-test", "./VendingMachineApp")
+                // 2. Run tests inside a temporary container from that image
+                // This 'inside' block automatically handles the --rm cleanup
+                testImage.inside {
+                sh 'python -m unittest test_vending_machine'
+                }   
+            }
                 
             }
         } 
@@ -27,7 +33,7 @@ pipeline{
                 echo 'Deploying to Dockerhub'
                 // This step should not normally be used in your script. Consult the inline help for details.
                 script{
-                    docker.withRegistry('https://index.docker.io/v1/', 'Docker_Hub' ) {
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-credentials' ) {
                     // some block
                     def myImage = docker.build("jirivasm/vending-app:1.0.${env.BUILD_ID}","./VendingMachineApp")
                     myImage.push()
