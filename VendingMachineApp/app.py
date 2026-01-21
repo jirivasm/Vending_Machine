@@ -16,10 +16,13 @@ users_db = {"Jose": User("Jose",100)}
 
 @app.route('/')
 def index():
-    if 'username' not in session:
+    
+    username = session.get('username')
+    if not username or username not in users_db:
+        session.pop('username', None) # Clean up the invalid session
         return redirect(url_for('login'))
     
-    current_user = users_db[session['username']]
+    current_user = users_db[username]
     return render_template('index.html', machine=machine, user=current_user)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -41,7 +44,7 @@ def login():
             
             balance = float(request.form.get('balance', 0))
             # Create the object and store it in our "database" dictionary
-            users_db[username] = User(balance, username)
+            users_db[username] = User(username, balance)
             session['username'] = username
             return redirect(url_for('index'))
 
