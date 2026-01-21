@@ -15,17 +15,13 @@ pipeline{
             }
         }
         stage('Build and Test') {
-        steps {
-            script{
-                // 1. Build the image once and store it in a variable
-                def testImage = docker.build("vending-app-test", "./VendingMachineApp")
-                // 2. Run tests inside a temporary container from that image
-                // This 'inside' block automatically handles the --rm cleanup
-                testImage.inside {
-                sh 'python -m unittest test_vending_machine'
-                }   
-            }
-                
+            steps {
+           
+            // Build using the Dockerfile you just shared
+            sh 'docker build -t vending-app ./VendingMachineApp'
+        
+            // Run the test - notice there is NO .py extension
+            sh 'docker run --rm vending-app python -m unittest test_vending_machine'
             }
         } 
         stage ('Push To registry'){
