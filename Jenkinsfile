@@ -61,6 +61,7 @@ spec:
                         sh "docker push jirivasm/vending-app:latest"
                     }
                 }
+            }
         }
     }
 
