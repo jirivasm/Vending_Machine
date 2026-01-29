@@ -10,6 +10,8 @@ spec:
     image: jirivasm/custom-jenkins:latest
     command: ['cat']
     tty: true
+    securityContext:
+      runAsUser: 0      
     volumeMounts:
     - mountPath: /var/run/docker.sock
       name: docker-sock
