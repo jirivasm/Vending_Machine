@@ -68,8 +68,8 @@ spec:
     post {
         always {
             container('docker') {
-                sh "docker rmi jirivasm/vending-app:1.0.${env.BUILD_ID} || true"
-                sh "docker rmi jirivasm/vending-app:latest || true"
+                sh "docker rmi -f jirivasm/vending-app:1.0.${env.BUILD_ID} || true"
+                sh "docker rmi -f jirivasm/vending-app:latest || true"
             }
         }
     }
