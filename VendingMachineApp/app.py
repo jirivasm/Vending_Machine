@@ -26,7 +26,7 @@ def index():
     
     current_user = users_db[username]
     stack = os.getenv('APP_STACK', 'Python Flask')
-    return render_template('index.html', machine=machine, user=current_user)
+    return render_template('index.html', machine=machine, user=current_user, stack=stack)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
