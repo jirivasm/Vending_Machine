@@ -23,6 +23,7 @@ def index():
         return redirect(url_for('login'))
     
     current_user = users_db[username]
+    stack = os.getenv('APP_STACK', 'Python Flask')
     return render_template('index.html', machine=machine, user=current_user)
 
 @app.route('/login', methods=['GET', 'POST'])
