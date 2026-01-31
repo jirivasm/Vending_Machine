@@ -28,6 +28,7 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    stack = os.getenv('APP_STACK', 'Python Flask')
     if request.method == 'POST':
         action = request.form.get('action')
         username = request.form.get('username')
@@ -49,7 +50,7 @@ def login():
             session['username'] = username
             return redirect(url_for('index'))
 
-    return render_template('login.html')
+    return render_template('login.html',stack=stack)
 
 @app.route('/logout')
 def logout():
