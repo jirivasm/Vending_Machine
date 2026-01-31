@@ -1,7 +1,9 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from VendingMachine import VendingMachine
 from Item import Item
 from User import User
+
 
 app = Flask(__name__)
 app.secret_key = "secret_vending_key" # for sessions
