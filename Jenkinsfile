@@ -28,6 +28,12 @@ spec:
             steps {
                 container('docker') {
                     sh 'docker --version'
+                    sh 'ls -l /var/run/docker.sock'
+        
+                    // 2. Check who the container thinks it is
+                    sh 'id'
+                    
+                    // 3. Try the command again
                     sh 'docker ps'
                 }
             }
