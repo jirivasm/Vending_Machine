@@ -28,6 +28,7 @@ spec:
             steps {
                 container('docker') {
                     sh 'docker --version'
+                    sh 'docker ps'
                 }
             }
         }       
