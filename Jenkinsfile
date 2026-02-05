@@ -52,7 +52,7 @@ spec:
                     // Using your confirmed VendingMachineApp directory
                     sh 'docker build -t vending-app ./VendingMachineApp'
                     echo '--- Running Unit Tests (In-Memory DB) ---'
-                    sh 'docker run --rm vending-app python -m unittest test_vending_machine'
+                    sh 'docker run --rm -e TESTING=true vending-app python -m unittest test_vending_machine'
                 }
             }
         } 
