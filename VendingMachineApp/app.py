@@ -88,7 +88,7 @@ def login():
                 return "User not found! <a href='/login'>Try again</a>"
 
         elif action == "create":
-            if user:
+            if User.query.get(username):
                 return "Username taken! <a href='/login'>Try again</a>"
             
             balance = float(request.form.get('balance', 0))

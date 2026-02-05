@@ -8,9 +8,11 @@ class TestVendingApp(unittest.TestCase):
         Sets up a temporary "In-Memory" database so we don't touch the real Postgres.
         """
         # Configure Flask for testing
-        app.config['TESTING'] = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:' # Fast RAM DB
-        app.config['WTF_CSRF_ENABLED'] = False # Disable security tokens for testing
+        app.config.update({
+            "TESTING": True,
+            "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:", # Force SQLite
+            "SQLALCHEMY_TRACK_MODIFICATIONS": False
+        })
 
         # Create a test client (simulates a browser)
         self.client = app.test_client()
