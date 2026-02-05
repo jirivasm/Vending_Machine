@@ -7,6 +7,11 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
+# 3. SECURITY: Create a non-root user and switch to it
+# 'useradd -m' creates a home dir, 'vending' is the username
+RUN useradd -m vending && chown -R vending /app
+USER vending
+
 ENV PYTHONPATH=/app
 
 EXPOSE 5001

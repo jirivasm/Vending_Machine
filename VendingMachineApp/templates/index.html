@@ -19,18 +19,21 @@
     
     <h3>Insert Money</h3>
     <form action="/insert" method="post">
-        <input type="number" name="amount" step="0.01" placeholder="Amount">
+        <input type="number" name="amount" step="0.25" min="0.25" placeholder="Amount">
         <button type="submit">Insert</button>
     </form>
-
+    <a href="/return_change"><button>Return Change</button></a>
     <hr>
 
     <h3>Items</h3>
-    {% for code, item in machine.inventory.items() %}
-    <div>
-        {{ code }}: {{ item.name }} - ${{ item.price }} (Stock: {{ item.stock }})
-        <form action="/purchase" method="post" style="display:inline;">
-            <input type="hidden" name="code" value="{{ code }}">
+    {% for item in items %}
+    <div style="margin-bottom: 10px; padding: 5px; border-bottom: 1px solid #eee;">
+        <strong>{{ item.code }}</strong>: {{ item.name }} - ${{ "%.2f"|format(item.price) }}
+        <span style="color: {% if item.stock > 0 %}green{% else %}red{% endif %};">
+            (Stock: {{ item.stock }})
+        </span>
+        <form action="/purchase" method="post" style="display:inline; margin-left: 10px;">
+            <input type="hidden" name="code" value="{{ item.code }}">
             <button type="submit" {% if item.stock <= 0 %}disabled{% endif %}>Buy</button>
         </form>
     </div>
