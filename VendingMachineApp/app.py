@@ -51,8 +51,7 @@ def init_db():
         # Create tables if they don't exist
         db.create_all()
         
-        # Check if we have items, if not, add defaults
-        if Item.query.count() == 0:
+        if not db.session.get(Item, "A1"): 
             coke = Item(code="A1", name="Coke", price=1.50, stock=5)
             chips = Item(code="B2", name="Chips", price=2.00, stock=3)
             db.session.add_all([coke, chips])
@@ -64,7 +63,7 @@ def index():
     
     username = session.get('username')
     # Fetch user from DB instead of dictionary
-    current_user = User.query.get(username) if username else None
+    current_user = db.session.get(User, username) if username else None
 
     if not current_user:
         session.pop('username', None)
