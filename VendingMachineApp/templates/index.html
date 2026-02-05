@@ -12,8 +12,8 @@
     {% endwith %}
     
     <h1>Vending Machine</h1>
-    <p>User: {{ user.name }} | Wallet: ${{ "%.2f"|format(user.balance) }}</p>
-    <p><strong>Machine Credit: ${{ "%.2f"|format(machine.balance) }}</strong></p>
+    <p>User: {{ user.username }} | Wallet: ${{ "%.2f"|format(user.balance) }}</p>
+    <p><strong>Machine Credit: ${{ "%.2f"|format(session.get('machine_credit', 0.0) }}</strong></p>
 
     <hr>
     
