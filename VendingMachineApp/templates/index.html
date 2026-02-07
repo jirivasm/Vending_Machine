@@ -1,5 +1,24 @@
 <!DOCTYPE html>
 <html>
+    <head>
+    <title>Vending Machine</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .dashboard { display: flex; gap: 20px; justify-content: center; margin-bottom: 20px; }
+        .card { 
+            border: 1px solid #ccc; 
+            padding: 15px; 
+            border-radius: 8px; 
+            width: 200px; 
+            text-align: center; 
+            background-color: #f8f9fa;
+        }
+        .inventory-card { background-color: #e9ecef; }
+        .btn { padding: 5px 10px; cursor: pointer; }
+        .stock-green { color: green; }
+        .stock-red { color: red; }
+    </style>
+</head>
 <body>
     {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -12,35 +31,74 @@
     {% endwith %}
     
     <h1>Vending Machine</h1>
-    <p>User: {{ user.name }} | Wallet: ${{ "%.2f"|format(user.balance) }}</p>
-    <p><strong>Machine Credit: ${{ "%.2f"|format(machine.balance) }}</strong></p>
+    <div style="text-align: center; margin-bottom: 10px;">
+        <h3>Hello, {{ user.username }} 👋</h3>
+    </div>
+
+    <div class="dashboard">
+        <div class="card">
+            <h3>💰 Wallet</h3>
+            <p style="font-size: 24px; font-weight: bold; color: green;">
+                ${{ "%.2f"|format(user.balance) }}
+            </p>
+        </div>
+
+        <div class="card inventory-card">
+            <h3>🎒 Inventory</h3>
+            {% if inventory %}
+                <ul style="list-style-type: none; padding: 0;">
+                    {% for item in inventory %}
+                        <li style="border-bottom: 1px solid #ddd; padding: 5px;">{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color: #666;">Empty</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-bottom: 20px;">
+        <p style="font-size: 18px;"><strong>Machine Credit: ${{ "%.2f"|format(session.get('machine_credit', 0.0) )}}</strong></p>
+    </div>
+
 
     <hr>
     
-    <h3>Insert Money</h3>
-    <form action="/insert" method="post">
-        <input type="number" name="amount" step="0.01" placeholder="Amount">
-        <button type="submit">Insert</button>
-    </form>
+   <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
+        <form action="/insert" method="post" style="margin: 0;">
+            <label><strong>Insert Money:</strong></label>
+            <input type="number" name="amount" step="0.25" min="0.25" placeholder="0.25">
+            <button type="submit" class="btn">Insert</button>
+        </form>
+        
+        <a href="/return_change"><button class="btn">Return Change</button></a>
+    </div>
+    </hr>
 
-    <hr>
-
-    <h3>Items</h3>
-    {% for code, item in machine.inventory.items() %}
-    <div>
-        {{ code }}: {{ item.name }} - ${{ item.price }} (Stock: {{ item.stock }})
-        <form action="/purchase" method="post" style="display:inline;">
-            <input type="hidden" name="code" value="{{ code }}">
-            <button type="submit" {% if item.stock <= 0 %}disabled{% endif %}>Buy</button>
+   <h3>Available Items</h3>
+    {% for item in items %}
+    <div style="margin-bottom: 10px; padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <strong>{{ item.code }}</strong>: {{ item.name }} - ${{ "%.2f"|format(item.price) }}
+            <span class="{% if item.stock > 0 %}stock-green{% else %}stock-red{% endif %}">
+                (Stock: {{ item.stock }})
+            </span>
+        </div>
+        
+        <form action="/purchase" method="post" style="margin: 0;">
+            <input type="hidden" name="code" value="{{ item.code }}">
+            <button type="submit" class="btn" {% if item.stock <= 0 %}disabled{% endif %}>Buy</button>
         </form>
     </div>
     {% endfor %}
 
     <br>
     <a href="/logout">Logout/Quit</a>
+
     <footer>
-    <p>Architecture: <strong>{{ stack }}</strong></p>
-    <p>For more information please visit <a href="https://www.jirivasm.dev/home-lab">https://www.jirivasm.dev/home-lab</a></p>
+        <hr>
+        <p>Architecture: <strong>{{ stack }}</strong></p>
+        <p>For more information please visit <a href="https://www.jirivasm.dev/home-lab">https://www.jirivasm.dev/home-lab</a></p>
     </footer>
 </body>
 </html>
