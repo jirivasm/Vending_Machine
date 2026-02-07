@@ -62,9 +62,9 @@ spec:
                     // Use standard shell commands instead of the 'docker' groovy object
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USER')]) {
                         sh "echo \$DOCKER_HUB_PASSWORD | docker login -u \$DOCKER_HUB_USER --password-stdin"
-                        sh "docker build -t jirivasm/vending-app:1.0.${env.BUILD_ID} ./VendingMachineApp"
-                        sh "docker tag jirivasm/vending-app:1.0.${env.BUILD_ID} jirivasm/vending-app:latest"
-                        sh "docker push jirivasm/vending-app:1.0.${env.BUILD_ID}"
+                        sh "docker build -t jirivasm/vending-app:2.0.${env.BUILD_ID} ./VendingMachineApp"
+                        sh "docker tag jirivasm/vending-app:2.0.${env.BUILD_ID} jirivasm/vending-app:latest"
+                        sh "docker push jirivasm/vending-app:2.0.${env.BUILD_ID}"
                         sh "docker push jirivasm/vending-app:latest"
                     }
                 }
