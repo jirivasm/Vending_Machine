@@ -38,6 +38,12 @@ class User(db.Model):
     username = db.Column(db.String(50), primary_key=True)
     balance = db.Column(db.Float, default=0.0)
 
+class Purchase(db.Model):
+    __tablename__ = 'purchases'
+    id = db.Column(db.Integer, primary_key=True)
+    user_username = db.Column(db.String(50), db.ForeignKey('users.username'))
+    item_name = db.Column(db.String(50))
+
 class Item(db.Model):
     __tablename__ = 'items'
     code = db.Column(db.String(10), primary_key=True) # e.g., "A1"
@@ -74,8 +80,11 @@ def index():
     items = Item.query.all()
     stack = os.getenv('APP_STACK', 'Python Flask')
     
+    user_purchases = Purchase.query.filter_by(user_username=username).all()
+    inventory_list = [p.item_name for p in user_purchases]
+    
     # Pass 'items' list to template instead of 'machine' object
-    return render_template('index.html', items=items, user=current_user, stack=stack)
+    return render_template('index.html', items=items, user=current_user, stack=stack, inventory=inventory_list)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -134,6 +143,7 @@ def insert():
 @app.route('/purchase', methods=['POST'])
 def purchase():
     code = request.form.get('code')
+    username = session.get('username')
     
     # Get the item from the DB
     item = Item.query.get(code)
@@ -155,6 +165,10 @@ def purchase():
         
         # 2. Update Stock (DB)
         item.stock -= 1
+        
+        new_purchase = Purchase(user_username=username, item_name=item.name)
+        db.session.add(new_purchase)
+        
         db.session.commit()
         
         flash(f"Dispensing {item.name}. Enjoy!")
