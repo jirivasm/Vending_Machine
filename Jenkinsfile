@@ -43,16 +43,26 @@ spec:
             steps {
                 echo 'Checking out the repo...'
                 checkout scm
+                container('docker') {
+                    echo 'Register QEMU handlers ONCE'
+                    sh 'docker run --privileged --rm tonistiigi/binfmt --install all'
+                }
             }
         }
 
         stage('Build and Test') {
             steps {
                 container('docker') {
-                    // Using your confirmed VendingMachineApp directory
-                    sh 'docker build -t vending-app ./VendingMachineApp'
-                    echo '--- Running Unit Tests (In-Memory DB) ---'
-                    sh 'docker run --rm -e TESTING=true vending-app python -m unittest test_vending_machine'
+
+                    script{
+                        // Register QEMU handlers in the host kernel via the container
+                        
+                        sh 'docker buildx create --use --name mybuilder || true'
+                        // Using your confirmed VendingMachineApp directory
+                        sh 'docker buildx build --platform linux/amd64 -t vending-app --load ./VendingMachineApp'
+                        echo '--- Running Unit Tests (In-Memory DB) ---'
+                        sh 'docker run --rm -e TESTING=true vending-app python -m unittest test_vending_machine'
+                    }
                 }
             }
         } 
@@ -60,13 +70,17 @@ spec:
         stage('Push To Registry') {
             steps {
                 container('docker') {
+                    
                     // Use standard shell commands instead of the 'docker' groovy object
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USER')]) {
+                        sh 'docker buildx create --use --name mybuilder || true'
                         sh "echo \$DOCKER_HUB_PASSWORD | docker login -u \$DOCKER_HUB_USER --password-stdin"
-                        sh "docker build -t jirivasm/vending-app:2.0.${env.BUILD_ID} ./VendingMachineApp"
-                        sh "docker tag jirivasm/vending-app:2.0.${env.BUILD_ID} jirivasm/vending-app:latest"
-                        sh "docker push jirivasm/vending-app:2.0.${env.BUILD_ID}"
-                        sh "docker push jirivasm/vending-app:latest"
+                        sh """
+                        docker buildx build --platform linux/amd64,linux/arm64 \
+                        -t jirivasm/vending-app:2.0.${env.BUILD_ID}  \
+                        -t jirivasm/vending-app:latest \
+                        --push ./VendingMachineApp
+                        """
                     }
                 }
             }
@@ -76,8 +90,10 @@ spec:
     post {
         always {
             container('docker') {
-                sh "docker rmi -f jirivasm/vending-app:${env.BUILD_ID} || true"
+                sh "docker rmi -f vending-app || true"
+                sh "docker rmi -f jirivasm/vending-app:2.0.${env.BUILD_ID} || true"
                 sh "docker rmi -f jirivasm/vending-app:latest || true"
+                sh 'docker buildx rm mybuilder || true'
             }
         }
     }
