@@ -5,6 +5,8 @@ pipeline {
 apiVersion: v1
 kind: Pod
 spec:
+  nodeSelector:
+    kubernetes.io/arch: amd64
   containers:
   - name: docker
     image: jirivasm/custom-jenkins:latest
