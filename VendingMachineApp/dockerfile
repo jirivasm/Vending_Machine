@@ -1,19 +1,43 @@
-FROM python:3.12-slim
+# ==========================================
+# STAGE 1: The Builder
+# ==========================================
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
+# Create a virtual environment so we can easily copy all dependencies later
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
 COPY requirements.txt .
-RUN pip install -r requirements.txt
 
-COPY . .
+# Install dependencies into the venv, ensuring no cache is saved
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 3. SECURITY: Create a non-root user and switch to it
-# 'useradd -m' creates a home dir, 'vending' is the username
-RUN useradd -m vending && chown -R vending /app
+# ==========================================
+# STAGE 2: The Final Production Image
+# ==========================================
+FROM python:3.12-slim
+
+# 1. SECURITY: Create the user first
+RUN useradd -m vending
+
+WORKDIR /app
+
+# 2. EFFICIENCY: Copy only the compiled venv from the builder stage
+# Using --chown during the COPY prevents doubling the layer size
+COPY --from=builder --chown=vending:vending /opt/venv /opt/venv
+
+# 3. Copy your Vending Machine app code
+COPY --chown=vending:vending . .
+
+# 4. Switch to the non-root user
 USER vending
 
-ENV PYTHONPATH=/app
+# 5. Set environment variables (activate the venv)
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONPATH="/app"
 
 EXPOSE 5001
 
-CMD ["python","app.py"]
+CMD ["python", "app.py"]

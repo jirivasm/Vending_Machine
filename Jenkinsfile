@@ -5,97 +5,83 @@ pipeline {
 apiVersion: v1
 kind: Pod
 spec:
+  # Run the build on the Raspberry Pi nodes
   nodeSelector:
-    kubernetes.io/arch: amd64
+    kubernetes.io/arch: arm64
   containers:
-  - name: docker
-    image: jirivasm/custom-jenkins:latest
-    command: ['cat']
-    tty: true
-    securityContext:
-      runAsUser: 0      
+  - name: jnlp
+    image: jenkins/inbound-agent:latest
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "2Gi"
+        cpu: "1000m"
+        
+  # NEW: A native Python container just for running your unit tests
+  - name: python-tester
+    image: python:3.11-slim
+    command: ['sleep', '99d']
+    
+  # The Kaniko builder
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    command: ['sleep', '99d']
     volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: docker-sock
+    - name: kaniko-secret
+      mountPath: /kaniko/.docker
+      
   volumes:
-  - name: docker-sock
-    hostPath:
-      path: /var/run/docker.sock
+  - name: kaniko-secret
+    secret:
+      secretName: regcred
+      items:
+      - key: .dockerconfigjson
+        path: config.json
 """
         }
     }
     
     stages {
-        stage('Check Environment') {
-            steps {
-                container('docker') {
-                    sh 'docker --version'
-                    sh 'ls -l /var/run/docker.sock'
-        
-                    // 2. Check who the container thinks it is
-                    sh 'id'
-                    
-                    // 3. Try the command again
-                    sh 'docker ps'
-                }
-            }
-        }       
-        
         stage('Prepare') {
             steps {
                 echo 'Checking out the repo...'
                 checkout scm
-                container('docker') {
-                    echo 'Register QEMU handlers ONCE'
-                    sh 'docker run --privileged --rm tonistiigi/binfmt --install all'
-                }
             }
         }
 
-        stage('Build and Test') {
+        stage('Run Unit Tests') {
             steps {
-                container('docker') {
-
-                    script{
-                        // Register QEMU handlers in the host kernel via the container
+                // Run the tests natively inside the Python container
+                container('python-tester') {
+                    dir('VendingMachineApp') {
+                        sh '''
+                        echo "--- Running Unit Tests (In-Memory DB) ---"
+                        export TESTING=true
                         
-                        sh 'docker buildx create --use --name mybuilder || true'
-                        // Using your confirmed VendingMachineApp directory
-                        sh 'docker buildx build --platform linux/amd64 -t vending-app --load ./VendingMachineApp'
-                        echo '--- Running Unit Tests (In-Memory DB) ---'
-                        sh 'docker run --rm -e TESTING=true vending-app python -m unittest test_vending_machine'
+                        # If you have dependencies, uncomment the next line:
+                        # pip install -r requirements.txt 
+                        
+                        python -m unittest test_vending_machine
+                        '''
                     }
                 }
             }
         } 
 
-        stage('Push To Registry') {
+        stage('Build and Push') {
             steps {
-                container('docker') {
-                    
-                    // Use standard shell commands instead of the 'docker' groovy object
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USER')]) {
-                        sh 'docker buildx create --use --name mybuilder || true'
-                        sh "echo \$DOCKER_HUB_PASSWORD | docker login -u \$DOCKER_HUB_USER --password-stdin"
-                        sh """
-                        docker buildx build --platform linux/amd64,linux/arm64 \
-                        -t jirivasm/vending-app:2.0.${env.BUILD_ID}  \
-                        -t jirivasm/vending-app:latest \
-                        --push ./VendingMachineApp
-                        """
-                    }
+                container('kaniko') {
+                    // Note: Context and Dockerfile paths updated for the VendingMachineApp subfolder
+                    sh """
+                    /kaniko/executor \
+                      --context ${WORKSPACE}/VendingMachineApp \
+                      --dockerfile ${WORKSPACE}/VendingMachineApp/Dockerfile \
+                      --destination jirivasm/vending-app:2.0.${env.BUILD_ID} \
+                      --destination jirivasm/vending-app:latest
+                    """
                 }
-            }
-        }
-    }
-
-    post {
-        always {
-            container('docker') {
-                sh "docker rmi -f vending-app || true"
-                sh "docker rmi -f jirivasm/vending-app:2.0.${env.BUILD_ID} || true"
-                sh "docker rmi -f jirivasm/vending-app:latest || true"
-                sh 'docker buildx rm mybuilder || true'
             }
         }
     }
