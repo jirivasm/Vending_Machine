@@ -75,7 +75,7 @@ spec:
                     sh """
                     /kaniko/executor \
                       --context ${WORKSPACE}/VendingMachineApp \
-                      --dockerfile ${WORKSPACE}/VendingMachineApp/Dockerfile \
+                      --dockerfile ${WORKSPACE}/VendingMachineApp/dockerfile \
                       --destination jirivasm/vending-app:3.0.${env.BUILD_ID} \
                       --destination jirivasm/vending-app:latest
                     """
