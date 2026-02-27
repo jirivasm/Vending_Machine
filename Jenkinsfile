@@ -58,10 +58,8 @@ spec:
                     dir('VendingMachineApp') {
                         sh '''
                         echo "--- Running Unit Tests (In-Memory DB) ---"
+                        pip install --no-cache-dir -r requirements.txt
                         export TESTING=true
-                        
-                        # If you have dependencies, uncomment the next line:
-                        # pip install -r requirements.txt 
                         
                         python -m unittest test_vending_machine
                         '''
